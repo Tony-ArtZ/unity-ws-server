@@ -1,7 +1,20 @@
 const WebSocket = require("ws");
 const { v4: uuidv4 } = require("uuid");
+const http = require("http");
 
-const server = new WebSocket.Server({ port: 8080 });
+// Create an HTTP server
+const httpServer = http.createServer((req, res) => {
+  if (req.method === "GET" && req.url === "/ping") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("pong");
+  } else {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("Not Found");
+  }
+});
+
+// Create a WebSocket server that uses the HTTP server
+const server = new WebSocket.Server({ server: httpServer });
 
 const players = {};
 
@@ -95,4 +108,9 @@ server.on("connection", function connection(ws) {
       }
     });
   });
+});
+
+// Start the HTTP server on port 8080
+httpServer.listen(8080, () => {
+  console.log("Server is listening on port 8080");
 });
